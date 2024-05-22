@@ -184,6 +184,149 @@ for(i in aa[j]:(aa[j+1] - 1))
   return(tab)
 }
 
+# TAB TASA ---------------------------------------------------------------------
+#' @title Tab_tasa
+#' @description This function allows you to obtain a list with rate for each 10 000 tabulations corresponding to estimations, coefficients of variation, confidence intervals and standard errors.
+#' It requires a data set with the appropriate expansion factor and the sampling design of the "survey" library.
+#' @param xx Vector containing the names of the variables that will be used in the calculation. Usually: c("TOT", paste0("TOT_", 1:n))
+#' @param D Variable to make a disaggregation between quotation marks.
+#' @param z  Labels for the data frame.
+#' @keywords estimator, survey.
+#' @return List of four entries.
+#' @examples
+Tab_tasa <- function(xx, D, z) {
+
+  pob0 <- svytotal(t7[,xx],asp)
+  pob <- as.data.frame(pob0)
+  cv_pob <- cv(pob0)*100
+  int_pob <- confint(pob0, level = 0.95)
+  int_pob <- as.data.frame(int_pob)
+  se_pob <- SE(pob0)
+
+  rel0 <- svyratio(t7[,xx], denominator=t7[,xx[1]], asp)
+  rel_pob <- as.data.frame(rel0[[1]]*10000)
+  cv_rel_pob <- cv(rel0)*100
+  int_rel_pob <- confint(rel0, level = 0.95)*10000
+  int_rel_pob <- as.data.frame(int_rel_pob)
+  se_rel_pob <- SE(rel0)*10000
+
+  #desagregados de los nacionales por entidad
+  ent0 <- svyby(t7[,xx], by = t7[,D], asp, svytotal)
+  ent <- as.data.frame(ent0[, 2:(length(xx)+1)])
+  cv_ent <- cv(ent0)*100
+  int_ent <- confint(ent0, level = 0.95)
+  int_ent <- as.data.frame(int_ent)
+  se_ent <- SE(ent0)
+
+  rel_ent0 <- svyby(t7[,xx], by = t7[,D], denominator= ~TOT, asp, svyratio)
+  rel_ent <- as.data.frame(rel_ent0[,2:(length(xx)+1)])*10000
+  cv_rel_ent <- cv(rel_ent0)*100
+  int_rel_ent <- confint(rel_ent0, level = 0.95)*10000
+  int_rel_ent <- as.data.frame(int_rel_ent)
+  se_rel_ent <- SE(rel_ent0)*10000
+
+  #---
+  est_nal <- list()
+  for(i in 1:length(xx)){
+    est_nal[[i]] <- data.frame(pob[[1]][i], rel_pob[i, 1],NA)
+  }
+  est_nac <- do.call(cbind, est_nal)
+  est_nac <- est_nac[-c(2, dim(est_nac)[2])]
+
+  cv_nal <- list()
+  for(i in 1:length(xx)){
+    cv_nal[[i]] <- data.frame(cv_pob[[i]], cv_rel_pob[i], NA)
+  }
+  cv_nac <- do.call(cbind, cv_nal)
+  cv_nac <- cv_nac[-c(2, dim(cv_nac)[2])]
+
+  int_nal <- list()
+  for(i in 1:length(xx)){
+    int_nal[[i]] <- data.frame(int_pob[i, ], NA, int_rel_pob[i,], NA)
+  }
+  int_nac <- do.call(cbind, int_nal)
+  int_nac <- int_nac[-c(3:5, dim(int_nac)[2])]
+
+  se_nal <- list()
+  for(i in 1:length(xx)){
+    se_nal[[i]] <- data.frame(se_pob[[i]], se_rel_pob[i], NA)
+  }
+  se_nac <- do.call(cbind, se_nal)
+  se_nac <- se_nac[-c(2, dim(se_nac)[2])]
+
+  #---
+  est_des <- list()
+  for(i in 1:length(xx)){
+    est_des[[i]] <- data.frame(ent[i], rel_ent[i], NA)
+  }
+  est_ent <- do.call(cbind, est_des)
+  est_ent <- est_ent[-c(2, dim(est_ent)[2])]
+
+  cv_des <- list()
+  for(i in 1:length(xx)){
+    cv_des[[i]] <- data.frame(cv_ent[i], cv_rel_ent[i], NA)
+  }
+  cv_ent <- do.call(cbind, cv_des)
+  cv_ent <- cv_ent[-c(2, dim(cv_ent)[2])]
+
+  aa <- seq(1,dim(int_ent)[1]+length(xx), length(table(t7[,D])))
+
+  for(i in 1:length(xx))eval(parse(text = paste0("
+          int_a_",i," <- list()
+          int_b_",i," <- list()
+")))
+
+  for(j in 1: length(xx))eval(parse(text = paste0("
+for(i in aa[j]:(aa[j+1] - 1))
+    int_a_",j,"[[i]] <- data.frame(int_ent[i,])
+")))
+
+  for(j in 1: length(xx))
+    eval(parse(text = paste0("
+    int_a_",j," <- do.call(rbind, int_a_",j,")
+")))
+
+  for(j in 1: length(xx))eval(parse(text = paste0("
+for(i in aa[j]:(aa[j+1] - 1))
+    int_b_",j,"[[i]] <- data.frame(int_rel_ent[i,])
+")))
+
+  for(j in 1: length(xx))
+    eval(parse(text = paste0("
+    int_b_",j," <- do.call(rbind, int_b_",j,")
+")))
+
+  int_ent <-data.frame(int_a_1, NA, int_b_1)
+
+  for(i in 2:length(xx))eval(parse(text = paste0("
+  int_ent <- data.frame(int_ent, NA, int_a_",i,",NA,int_b_",i,")
+")))
+  int_ent <- int_ent[-c(3:5)]
+
+  se_des <- list()
+  for(i in 1:length(xx)){
+    se_des[[i]] <- data.frame(se_ent[i], se_rel_ent[i], NA)
+  }
+  se_ent <- do.call(cbind, se_des)
+  se_ent <- se_ent[-c(2, dim(se_ent)[2])]
+  #-
+  tab <- list()
+  colnames(est_ent)<-colnames(est_nac)
+  colnames(cv_ent)<-colnames(cv_nac)
+  colnames(int_ent)<-colnames(int_nac)
+  colnames(se_ent)<-colnames(se_nac)
+
+  tab[[1]] <- rbind(est_nac, est_ent)
+  tab[[2]] <- rbind(cv_nac, cv_ent)
+  tab[[3]] <- rbind(int_nac, int_ent)
+  tab[[4]] <- rbind(se_nac, se_ent)
+
+  tab[[1]] <- cbind(z, tab[[1]])
+  tab[[2]] <- cbind(z, tab[[2]])
+  tab[[3]] <- cbind(z, tab[[3]])
+  tab[[4]] <- cbind(z, tab[[4]])
+  return(tab)
+}
 
 # TAB VERTICAL -----------------------------------------------------------------
 #' @title Tab_vert_a
@@ -616,5 +759,127 @@ pinta <- function(est, cv, hoja, ruta, salva){
   }else{
    print("Ejecuta con el libro cerrado: openxlsx::saveWorkbook(wb, ruta, overwrite = T)")
  }
+
+}
+
+
+# TABULEDOR ------------------------------------------------------------------
+#' @title tabuledor
+#' @description This function makes the arrange for many data frames mixing in a suitable way the corresponding rows.
+#' @param precision Set as default 1:4.
+#' @param muchos Number of extra tabulations besides the national to be mixed.
+#' @param noms Vector of labels.
+#' @param tipo Type of dis-aggregations.
+#' @param quita1 If distinct of NULL indicates NA in the first row.
+#' @param quita2 If distinct of NULL indicates MA in the second column.
+#' @param con_otros If distinct of NULL indicates the "Otros" options buttom in the data frames.
+#' @details
+#' You can use noms = purrr::map(.x = sector, .f = ~ c(.x, z) ), where z is a labels vector and
+#' labels in sector will be the firs label in the resulting data frame.
+#'
+tabuledor <- function(precision = 1:4, muchos, noms, tipo,
+                      quita1=NULL, quita2=NULL, con_otros= NULL){
+  tabs <- list()
+
+  x1<-list()
+  x1[[1]] <- pegadora(lista = bla[[1]], cuantos = muchos, prec = precision[1], renglon = 1, nombres = noms[[1]] )
+  orden <- ordena(lista = x1[[1]], otros = con_otros)
+  x1[[1]] <- x1[[1]][orden,]
+  x1[[1]] <- mocha(tabla = x1[[1]], quita1, quita2)
+
+  for(i in 2:length(tipo)) eval(parse(text = paste0("
+      x1[[i]] <- pegadora(lista = bla[[1]], cuantos = muchos, prec = precision[1], renglon = ",i,",  nombres = noms[[i]] )
+      orden_",i," <- ordena(lista = x1[[i]], otros = con_otros)
+      x1[[i]] <- x1[[i]][orden_",i,",]
+      x1[[i]] <- mocha(tabla = x1[[i]], quita1, quita2)
+      #x1[[i]] <- x1[[i]][c(1:6,15),]
+  ")))
+  tabs[[1]] <- do.call(rbind,x1)
+  tabs[[1]] <- tabs[[1]] [-dim(tabs[[1]] )[1],]
+
+  for(j in 2:length(precision)){
+    x1 <- list()
+    x1[[1]] <- pegadora(lista = bla[[j]], cuantos = muchos, prec = precision[j], renglon = 1, nombres = noms[[1]] )
+    x1[[1]] <- x1[[1]][orden,]
+    x1[[1]] <- mocha(tabla = x1[[1]], quita1, quita2)
+
+    for(i in 2:length(tipo)) eval(parse(text = paste0("
+         x1[[i]] <- pegadora(lista = bla[[j]], cuantos = muchos, prec = precision[j], renglon = ",i,",  nombres = noms[[i]] )
+         x1[[i]] <- x1[[i]][orden_",i,",]
+         x1[[i]] <- mocha(tabla = x1[[i]], quita1, quita2)
+         #x1[[i]] <- x1[[i]][c(1:6,15),]
+     ")))
+
+    tabs[[j]] <- do.call(rbind,x1)
+    tabs[[j]] <- tabs[[j]] [-dim(tabs[[j]] )[1],]
+  }
+
+  return(tabs)}
+
+# Tabuleadora ------------------------------------------------------------------
+#' @title tabuleadora
+#' @description This function makes the arrange for many data frames mixing in a suitable way the corresponding rows.
+#' @param precision Set as default 1:4.
+#' @param muchos Number of extra tabulations besides the national to be mixed.
+#' @param noms Vector of labels.
+#' @param tipo Type of dis-aggregations.
+#' @param quita1 If distinct of NULL indicates NA in the first row.
+#' @param quita2 If distinct of NULL indicates MA in the second column.
+#' @param con_otros If distinct of NULL indicates the "Otros" options buttom in the data frames.
+#' @param recorta The number of rows in each resulting block.
+#' @details
+#' You can use noms = purrr::map(.x = sector, .f = ~ c(.x, z) ), where z is a labels vector and
+#' labels in sector will be the firs label in the resulting data frame.
+#'
+#' When recorta!=NULL the final data frame will contain less rows in each block than the "muchos" parameter.
+tabuleadora <- function(precision = 1:4,
+                        muchos,
+                        noms,
+                        tipo,
+                        quita1=NULL,
+                        quita2=NULL,
+                        con_otros = NULL,
+                        recorta=NULL){
+  if(is.null(recorta)) {
+    tabs <- tabuledor(precision = 1:4, muchos=muchos, noms=noms, tipo = tipo,
+                      quita1=quita1, quita2=quita2, con_otros=con_otros)
+  }else{
+    tabs <- list()
+
+    x1<-list()
+    x1[[1]] <- pegadora(lista = bla[[1]], cuantos = muchos, prec = precision[1], renglon = 1, nombres = noms[[1]] )
+    orden <- ordena(lista = x1[[1]], otros = con_otros)
+    x1[[1]] <- x1[[1]][orden,]
+    x1[[1]] <- mocha(tabla = x1[[1]], quita1, quita2)
+
+    for(i in 2:length(tipo)) eval(parse(text = paste0("
+        x1[[i]] <- pegadora(lista = bla[[1]], cuantos = muchos, prec = precision[1], renglon = ",i,",  nombres = noms[[i]] )
+        orden_",i," <- ordena(lista = x1[[i]], otros = con_otros)
+        x1[[i]] <- x1[[i]][orden_",i,",]
+        x1[[i]] <- mocha(tabla = x1[[i]], quita1, quita2)
+        x1[[i]] <- x1[[i]][c(1:recorta, dim(x1[[i]])[1]),]
+       ")))
+
+    tabs[[1]] <- do.call(rbind,x1)
+    tabs[[1]] <- tabs[[1]] [-dim(tabs[[1]] )[1],]
+
+    for(j in 2:length(precision)){
+      x1 <- list()
+      x1[[1]] <- pegadora(lista = bla[[j]], cuantos = muchos, prec = precision[j], renglon = 1, nombres = noms[[1]] )
+      x1[[1]] <- x1[[1]][orden,]
+      x1[[1]] <- mocha(tabla = x1[[1]], quita1, quita2)
+
+      for(i in 2:length(tipo)) eval(parse(text = paste0("
+        x1[[i]] <- pegadora(lista = bla[[j]], cuantos = muchos, prec = precision[j], renglon = ",i,",  nombres = noms[[i]] )
+        x1[[i]] <- x1[[i]][orden_",i,", ]
+        x1[[i]] <- mocha(tabla = x1[[i]], quita1, quita2)
+        x1[[i]] <- x1[[i]][c(1:recorta, dim(x1[[i]])[1]),]
+       ")))
+
+      tabs[[j]] <- do.call(rbind,x1)
+      tabs[[j]] <- tabs[[j]] [-dim(tabs[[j]] )[1],]
+    }
+  }
+  return(tabs)
 
 }
