@@ -11,6 +11,16 @@ This repository contains my R package named "tabINEGI". The functions in the pac
 
 It requires the "survey" and "openxlsx" librarys to make the calculus and arranges. 
 
+If you're interested in the installation of the package use the following code:
+
+options(timeout=9999999)
+install.packages("remotes")
+library(remotes)
+remotes::install_github("sanalexito/tabINEGI")
+library(tabINEGI)
+
+![image](https://github.com/sanalexito/tabINEGI/assets/65984679/362ea43d-84fa-4321-9701-7353adf60bd3)
+
 The correspondign DB should be downloaded from the INEGI's web site: https://www.inegi.org.mx/
 
 
