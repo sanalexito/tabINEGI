@@ -883,3 +883,33 @@ tabuleadora <- function(precision = 1:4,
   return(tabs)
 
 }
+
+
+# MOD A PRINCIPAL ---------------------------------------------------------------
+#' @title mod_a_principal
+#' @description This function allows you to carry a variable from a data basis with more rows provided for the named variable to another with minor number by some unique identifier.
+#' @param modulo The data basis with the original variable and more rows.
+#' @param principal The data basis where the calculation will be realized.
+#' @param variable Variable to be moved from one data basis to other.
+#' @param identificador Unique identifier.
+#' @details The function is used in the context of a crime modulus. Where to transfer some variable to the principal
+#' table is needed.
+#' @return Data frame with new variables coming from the modulus.
+#' @examples
+#'
+#'#Variable used in this case correspond to the ENVE of the INEGI.
+#'library(survey)
+#'tmv$corrupcion <- ifelse(tmv$ID_DELITO%in%15, tmv$FAC_EXPA, 0)
+#'Using the function you'll the "corrupcion" variable in the principal table.
+#'t7 <- mod_a_principal(modulo = tmv, principal = t7, variable = "corrupcion", identificador="CONSEC")
+#'#Not run.
+
+mod_a_principal <- function(modulo, principal, variable, identificador){
+  A <- data.frame(tapply(modulo[, variable], modulo[, identificador],sum))
+  A <- data.frame(rownames(A), A)
+  names(A) <- c(identificador, variable)
+  principal <- merge(principal, A, by=identificador, all.x = T)
+  principal[, variable] <- ifelse(principal[,variable]%in%NA, 0, principal[,variable])
+
+  return(principal)
+}
