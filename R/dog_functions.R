@@ -915,3 +915,20 @@ mod_a_principal <- function(modulo, principal, variable, identificador){
 
   return(principal)
 }
+
+# IMPRESORA --------------------------------------------------------------------
+#' @title impresora
+#' @description This function helps you to write your tabulations onto an Excel workbook.
+#' @param wbs Workbook used to write the tables.
+#' @param lista Data table to be printed.
+#' @param num_hoja Sheet of the corresponding workbook.
+#' @details The function is used to print the estimation or any other tables in the workbook.
+#'
+#' @keywords imprime
+#' @export
+impresora <- function(wbs, lista, num_hoja, ren){
+  openxlsx::writeData(wbs[[1]], sheet = num_hoja, lista[[1]], startRow = ren[1], colNames = F)
+  openxlsx::writeData(wbs[[2]], sheet = num_hoja, lista[[2]], startRow = ren[2], colNames = F)
+  openxlsx::writeData(wbs[[3]], sheet = num_hoja, lista[[3]], startRow = ren[3], colNames = F)
+  openxlsx::writeData(wbs[[4]], sheet = num_hoja, lista[[4]], startRow = ren[4], colNames = F)
+}
