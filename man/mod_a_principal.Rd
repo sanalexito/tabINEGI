@@ -2,7 +2,7 @@
 % Please edit documentation in R/dog_functions.R
 \name{mod_a_principal}
 \alias{mod_a_principal}
-\title{princ_a_mod}
+\title{mod_a_principal}
 \usage{
 mod_a_principal(modulo, principal, variable, identificador)
 }
@@ -25,3 +25,13 @@ This function allows you to carry a variable from a data basis with more rows pr
 The function is used in the context of a crime modulus. Where to transfer some variable to the principal
 table is needed.
 }
+\examples{
+#Variables used in this case correspond to the ENVE of the INEGI.
+tmv$corrupcion <- ifelse(tmv$ID_DELITO\%in\%'15', tmv$FAC_EXPA, 0)
+#Using the function you'll add the "corrupcion" variable at the principal table.
+prncpl <- mod_a_principal(modulo = modulo, principal = prncpl, variable = "corrupcion", identificador="CONSEC")
+prncpl
+#Run this example on the console
+}
+\keyword{modulus,}
+\keyword{principal}
