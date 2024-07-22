@@ -895,14 +895,16 @@ tabuleadora <- function(precision = 1:4,
 #' @details The function is used in the context of a crime modulus. Where to transfer some variable to the principal
 #' table is needed.
 #' @return Data frame with new variables coming from the modulus.
-#' @examples
 #'
-#'#Variable used in this case correspond to the ENVE of the INEGI.
-#'library(survey)
-#'tmv$corrupcion <- ifelse(tmv$ID_DELITO%in%15, tmv$FAC_EXPA, 0)
-#'Using the function you'll the "corrupcion" variable in the principal table.
-#'t7 <- mod_a_principal(modulo = tmv, principal = t7, variable = "corrupcion", identificador="CONSEC")
-#'#Not run.
+#' @keywords modulus, principal
+#' @export
+#' @examples
+#'#Variables used in this case correspond to the ENVE of the INEGI.
+#'prncpl$corrupcion <- ifelse(modulo$ID_DELITO%in%'15', modulo$FAC_EXPA, 0)
+#'#Using the function you'll add the "corrupcion" variable at the principal table.
+#'prncpl <- mod_a_principal(modulo = modulo, principal = prncpl, variable = "corrupcion", identificador="CONSEC")
+#'prncpl
+#'#Run this example on the console
 
 mod_a_principal <- function(modulo, principal, variable, identificador){
   A <- data.frame(tapply(modulo[, variable], modulo[, identificador],sum))
