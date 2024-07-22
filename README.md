@@ -27,6 +27,7 @@ library(tabINEGI)
 
 Finally, the correspondign DB should be downloaded from the INEGI's web site: https://www.inegi.org.mx/
 
+Some help in the link: https://r-mageddon.netlify.app/post/writing-an-r-package-from-scratch/
 
 <!-- Quote -->
 <h2 align="center">Te paso mi código, cambiar al mundo ya dependerá de ti 🤯 🗺️ 🌐
