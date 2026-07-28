@@ -1864,7 +1864,7 @@ compara_un_libro <- function(df1, df2, hoja_reporte, wb2){
 #' @export
 #'
 escribe_macro = function(v_texto, direccion_vbs,...) {
-  vbs = file(direccion.vbs,...)
+  vbs = file(direccion_vbs,...)
   writeLines(v_texto,vbs)
   close(vbs)
   }
@@ -1879,13 +1879,13 @@ escribe_macro = function(v_texto, direccion_vbs,...) {
 #' @export
 #'
 corre_macro = function(direccion_vbs){
-  shell(shQuote(normalizePath(direccion.vbs)), "cscript", flag = "//nologo")
+  shell(shQuote(normalizePath(direccion_vbs)), "cscript", flag = "//nologo")
 }
 
 # PINTAR_EXCEL -----------------------------------------------------------------
 #' @title pintar_EXCEL
 #' @description This function runs an external macros making the painted tabulations
-#' process using an external macro developed in VBA.
+#' process. That macros is developed in VBA.
 #' @param libro1 Location where the workbook with the estimation tabulations is placed.
 #' @param libro2 Location where the workbook with the variation coefficients tabulations is placed.
 #' @param dir_local_macro Route in local where the macros is located.
@@ -1905,7 +1905,147 @@ a0=c("Set objExcel = CreateObject(\"Excel.Application\")",
 
      paste0("objExcel.Application.Run ",paste0("\"'",dir_local_macro,"macro_pinta_enve_asp1.xlsm'!pinta\" "),", f1,f2"),
      "objExcel.Application.Quit")
-d0=paste0('D:/OneDrive - INEGI/Documents/R_VBS/',"pintarHTSP1.vbs")
+d0=paste0(dir_local_macro,"macros.vbs")
 escribe_macro(a0,d0)
 corre_macro(d0)
+}
+
+
+# COMPARAR_EXCEL -----------------------------------------------------------------
+#' @title comparar_EXCEL
+#' @description This function runs an external macros making the comparison of tabulations
+#' process. That macros is developed in VBA.
+#' @param libro1 Location where the workbook with the data tabulations is placed.
+#' @param libro2 Location where the workbook with the other data tabulations is placed.
+#' @param dir_local_macro Route in local where the macros is located.
+#' @details This function makes the process of comparing tabulations
+#' using an external macros. That macros needs be written in a suitable way in order
+#' to guarantee the appropriate execution.
+#' @export
+#'
+comparar_EXCEL = function(libro1,libro2, dir_local_macro) {
+  a0=c("Set objExcel = CreateObject(\"Excel.Application\")",
+       "objExcel.Visible = TRUE",
+       "objExcel.DisplayAlerts=FALSE",
+       "Public f1",
+       paste0("f1 = CStr(\"",libro1 ,"\")"),
+       "Public f2",
+       paste0("f2 = CStr(\"",libro2 ,"\")"),
+
+       paste0("objExcel.Application.Run ",paste0("\"'",dir_local_macro,"compara_libros_epsilon_asp1.xlsm'!ComparaEpsilon\" "),", f1,f2"),
+       "objExcel.Application.Quit")
+  d0=paste0(dir_local_macro,"macros.vbs")
+  escribe_macro(a0,d0)
+  corre_macro(d0)
+}
+
+
+# PONER ASTER EXCEL -----------------------------------------------------------------
+#' @title pone_aster_EXCEL
+#' @description This function runs an external macros making the star or asterisk
+#' process. That macros is developed in VBA.
+#' @param libro Location where the workbook with the data tabulations is placed.
+#' @param dir_local_macro Route in local where the macros is located.
+#' @details This function makes the process of placing star in tabulations
+#' using an external macros. That macros needs be written in a suitable way in order
+#' to guarantee the appropriate execution.
+#' @export
+#'
+pone_aster_EXCEL = function (libro, dir_local_macro)
+{
+  a0 = c("Set objExcel = CreateObject(\"Excel.Application\")",
+         "objExcel.Visible = TRUE",
+         "objExcel.DisplayAlerts=FALSE",
+         "Public f1",
+         paste0("f1 = CStr(\"", libro, "\")"),
+         paste0("objExcel.Application.Run ",
+                paste0("\"'", dir_local_macro, "busca_remplaza_asp1.xlsm'!busca_remplaza\" "), ", f1"),
+         "objExcel.Application.Quit")
+  d0 = paste0(dir_local_macro, "macro.vbs")
+  escribe_macro(a0, d0)
+  corre_macro(d0)
+}
+
+
+# SUPERINDICES EXCEL -----------------------------------------------------------
+#' @title superindex_EXCEL
+#' @description This function runs an external macros making the super-index placing
+#' process. That macros is developed in VBA.
+#' @param libro Location where the workbook with the data tabulations is placed.
+#' @param dir_local_macro Route in local where the macros is located.
+#' @details This function makes the process of placing super-index in tabulations
+#' using an external macros. That macros needs be written in a suitable way in order
+#' to guarantee the appropriate execution.
+#' @export
+#'
+superindex_EXCEL = function (libro, dir_local_macro)
+{
+  a0 = c("Set objExcel = CreateObject(\"Excel.Application\")",
+         "objExcel.Visible = TRUE",
+         "objExcel.DisplayAlerts=FALSE",
+         "Public f1",
+         paste0("f1 = CStr(\"", libro, "\")"),
+         paste0("objExcel.Application.Run ",
+                paste0("\"'", dir_local_macro, "superindices_asp1.xlsm'!superindice\" "), ", f1"),
+         "objExcel.Application.Quit")
+  d0 = paste0(dir_local_macro, "macro.vbs")
+  escribe_macro(a0, d0)
+  corre_macro(d0)
+}
+
+
+
+# SUPERINDICES NOTAS EXCEL -----------------------------------------------------
+#' @title superindex_notas_EXCEL
+#' @description This function runs an external macros making the notes super-index placing
+#' process. That macros is developed in VBA.
+#' @param libro Location where the workbook with the data tabulations is placed.
+#' @param dir_local_macro Route in local where the macros is located.
+#' @details This function makes the process of placing notes super-index in tabulations
+#' using an external macros. That macros needs be written in a suitable way in order
+#' to guarantee the appropriate execution.
+#' @export
+#'
+superindex_notas_EXCEL = function (libro, dir_local_macro)
+{
+  a0 = c("Set objExcel = CreateObject(\"Excel.Application\")",
+         "objExcel.Visible = TRUE",
+         "objExcel.DisplayAlerts=FALSE",
+         "Public f1",
+         paste0("f1 = CStr(\"", libro, "\")"),
+         paste0("objExcel.Application.Run ",
+                paste0("\"'", dir_local_macro, "macro_superindex_notas1.xlsm'!super_index_formatos\" "), ", f1"),
+         "objExcel.Application.Quit")
+  d0 = paste0(dir_local_macro, "macro.vbs")
+  escribe_macro(a0, d0)
+  corre_macro(d0)
+}
+
+
+# CUENTA_REGRESIVA -------------------------------------------------------------
+#' @title cuenta_regresiva
+#' @description This function makes a countdown with a kick-off in 10 seconds
+#' @param hora_inicio The current system time.
+#' @param duracion_segundos Is the time in seconds until the coountdown finishes.
+#' @details You can gives the duration editing the parameter duracion_segundos.
+#' @export
+#'
+cuenta_regresiva <- function(hora_inicio = Sys.time(), duracion_segundos = 10) {
+
+  hora_fin <- hora_inicio + duracion_segundos
+
+  while (Sys.time() < hora_fin) {
+    segundos_restantes <- ceiling(as.numeric(difftime(
+      hora_fin,
+      Sys.time(),
+      units = "secs"
+    )))
+
+    cat("\rTiempo restante:", segundos_restantes, "segundos   ")
+    flush.console()
+
+    Sys.sleep(1)
+  }
+
+  cat("\r¡Cuenta regresiva terminada!            \n")
 }
