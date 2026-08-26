@@ -525,15 +525,15 @@ eneadora_cv_se=function (A) {
     relativos <- seq(5, ncol(A), 3)
     relativos_prom <- c(relativos, ncol(A))
     absolutos <- c(2, pares[-length(pares)])
-    A[A[, 2] %in% 0, 2] <- 888888887
+    A[A[, 2] %in% 0, 2] <- -888888887
     for (i in 2:dim(A)[2]) {
-      A[A[, i] %in% NaN, i] <- 888888887
+      A[A[, i] %in% NaN, i] <- -888888887
     }
     for (i in pares) {
-      A[, i] <- ifelse(A[, i] %in% 0, 888888887, A[, i])
+      A[, i] <- ifelse(A[, i] %in% 0, -888888887, A[, i])
     }
     for (i in relativos_prom) {
-      A[, i] <- ifelse(A[, i] %in% 0, 888888887, A[, i])
+      A[, i] <- ifelse(A[, i] %in% 0, -888888887, A[, i])
     }
 
   }
@@ -570,45 +570,67 @@ columnas_no_vacias = function(A){
 #' @description This function places a numeric indicator representing a NA cell on the confidence intervals data frame.
 #' @param A A data frame of confidence intervals.
 #' @details
-#' The function uses the number 888888887 to represents a cell with NA instead the string "NA".
+#' The function uses the number 11111118888888871 to represents a cell with NA instead the string "NA".
 #' This is a useful feature in order to maintain the original format of a Excel workbook.
-eneadora_interv = function(A) {
-  if (ncol(A) <= 4 ){
+eneadora_interv = function (A) {
+  if (ncol(A) <= 4) {
     pa_usar = columnas_no_vacias(A)
-    pa_usar = which(!pa_usar%in%NA)[-1]
-
-    A[, pa_usar[1]] <- ifelse(A[, pa_usar[1]] %in% NaN | A[, pa_usar[1]] %in% 0, 888888887, A[, pa_usar[1]])
-    A[, pa_usar[1]+1] <- ifelse(A[, pa_usar[1]+1] %in% NaN | A[, pa_usar[1]+1] %in% 0, 888888887, A[, pa_usar[1]+1])
-
+    pa_usar = which(!pa_usar %in% NA)[-1]
+    A[, pa_usar[1]] <- ifelse(A[, pa_usar[1]] < 0, -888888888,
+                              A[, pa_usar[1]])
+    A[, pa_usar[1]] <- ifelse(A[, pa_usar[1]] %in% NaN |
+                                A[, pa_usar[1]] %in% 0, -888888887, A[, pa_usar[1]])
+    A[, pa_usar[1] + 1] <- ifelse(A[, pa_usar[1] + 1] %in%
+                                    NaN | A[, pa_usar[1] + 1] %in% 0, -888888887, A[, pa_usar[1] + 1])
     for (j in 1:nrow(A)) {
-      if (!is.na(A[j, pa_usar[1]]) & A[j, pa_usar[1]] %in% A[j, pa_usar[1] + 1]) {
-        A[j, pa_usar[1]] = 888888887
-        A[j, pa_usar[1] + 1] = 888888887
+      if (!is.na(A[j, pa_usar[1]]) & A[j, pa_usar[1]] %in%
+          A[j, pa_usar[1] + 1]) {
+        A[j, pa_usar[1]] = -888888887
+        A[j, pa_usar[1] + 1] = -888888887
       }
     }
-  }else{
-    pa_usar = columnas_no_vacias(A)
-    pa_usar = which(!pa_usar%in%NA)[-1]
-    pares <- pa_usar[seq(1,length(pa_usar),2)]
+  }else {
+    pa_usar0 = columnas_no_vacias(A)
+    pa_usar = which(!pa_usar0 %in% NA)[-1]
+    pares <- pa_usar[seq(1, length(pa_usar), 2)]
+
+    pa_rels1 = pa_usar0[which(is.na(pa_usar0))[seq(2, sum(is.na(pa_usar0)), by = 2)] + 1]
+    pa_rels2 = pa_rels1 + 1
+
+    pa_abs1 = pa_usar0[which(is.na(pa_usar0))[seq(1, sum(is.na(pa_usar0)), by = 2)] + 1]
+    pa_abs2 = pa_abs1 + 1
+
+    A[, pa_usar[1]] <- ifelse(A[, pa_usar[1]] < 0, -888888888,  A[, pa_usar[1]])
+
+    for (i in pa_rels1) {
+      A[, i] <- ifelse(A[, i] < 0, -888888889, A[, i])
+    }
+    for (i in pa_rels2) {
+      A[, i] <- ifelse(A[, i] >= 100, -999999999, A[, i])
+    }
+
+    for (i in pa_abs1) {
+      A[, i] <- ifelse(A[, i] < 0, -888888888, A[, i])
+    }
 
     for (i in pa_usar) {
-      A[, i] <- ifelse(A[, i] %in% NaN | A[, i] %in% 0, 888888887, A[, i])
+      A[, i] <- ifelse(A[, i] %in% NaN | A[, i] %in% 0, -888888887, A[, i])
     }
 
     for (i in pares) {
       for (j in 1:nrow(A)) {
         if (!is.na(A[j, i]) & A[j, i] %in% A[j, i + 1]) {
-          A[j, i] = 888888887
-          A[j, i + 1] = 888888887
+          A[j, i] = -888888887
+          A[j, i + 1] = -888888887
         }
       }
     }
+
+
+
   }
-
   return(A)
-
 }
-
 
 # ENEADORA ---------------------------------------------------------------------
 #' @title eneadora
@@ -631,21 +653,21 @@ eneadora <- function(lista){
 #' @description This function places a numeric indicator representing the strings 0\* and 0.0\* on the estimations tabulation.
 #' @param t The estimations data frame.
 #' @details
-#' The function places the number 888888888 to represents a cell with the string 0\* when the absolute value is 0.
+#' The function places the number -888888888 to represents a cell with the string 0\* when the absolute value is 0.
 #' Similarly places 0.0\* on the corresponding cell when appears 0.0 on the relatives columns.
 #' This is a useful feature in order to maintain the original format of a Excel workbook.
-#' The key is as follow:0\* <- 888888888; 0.0\* <- 888888889
+#' The key is as follow:0\* <- -888888888; 0.0\* <- -888888889
 asteriscos <- function(t){
   for(i in 0:((dim(t)[2]-5)/3))
   {
     filtro<-t[,(4+3*i)]%in%0 & !t[,(4+3*i)]%in%NA
     if(sum(filtro)>0){
-      t[filtro,(4+3*i)]<- 888888888
-      t[filtro,(5+3*i)]<- 888888889
+      t[filtro,(4+3*i)]= -888888888
+      t[filtro,(5+3*i)]= -888888889
     }
     filtro<-t[,(5+3*i)]%in%100 & !t[,(5+3*i)]%in%NA
     if(sum(filtro)>0){
-      t[filtro,(5+3*i)]<- 999999999
+      t[filtro,(5+3*i)]= -999999999
     }
   }
   return(t)
@@ -657,12 +679,12 @@ asteriscos <- function(t){
 #' @description This function places a numeric indicator representing the strings 0\*, 0.0\* and 100.0\* on the confidence intervals tabulation.
 #' @param A The confidence intervals data frame.
 #' @details
-#' The function places the number 888888888 to represents a cell with the string 0\* when the absolute value is 0.
+#' The function places the number -888888888 to represents a cell with the string 0\* when the absolute value is 0.
 #' Similarly places 0.0\* on the corresponding cell when appears 0.0 on the relatives columns. The same in the 100.0 cases.
 #' This is a useful feature in order to maintain the original format of a Excel workbook.
-#' The key is as follow:0\* <- 888888888; 0.0\* <- 888888889; 100.0\* <- 999999999
+#' The key is as follow:0\* <- -888888888; 0.0\* <- -888888889; 100.0\* <- -999999999
 asteriscos_int <- function(A){
-  #"0*" <- 888888888; #"0.0*" <- 888888889
+  #"0*" <- -888888888; #"0.0*" <- -888888889
   absolutos <- c(2,seq(5, ncol(A)-2, 6))
   absolutos1 <- absolutos+1
 
@@ -670,13 +692,13 @@ asteriscos_int <- function(A){
   relativos1 <- relativos+1
 
   for(i in absolutos){
-    A[,i] <- ifelse(as.numeric(A[,i])<0 & !is.na(A[,i]), 888888888, A[,i])
+    A[,i] <- ifelse(as.numeric(A[,i])<0 & !is.na(A[,i]), -888888888, A[,i])
   }
   for(i in relativos){
-    A[,i] <- ifelse(as.numeric(A[,i])<0 & !is.na(A[,i]), 888888889, A[,i])
+    A[,i] <- ifelse(as.numeric(A[,i])<0 & !is.na(A[,i]), -888888889, A[,i])
   }
   for(i in relativos1){
-    A[,i] <- ifelse(as.numeric(A[,i])>100 & !is.na(A[,i]), 999999999, A[,i])
+    A[,i] <- ifelse(as.numeric(A[,i])>100 & !is.na(A[,i]), -999999999, A[,i])
   }
 
   return(A)
@@ -1986,7 +2008,7 @@ superindex_EXCEL = function (libro, dir_local_macro)
          "Public f1",
          paste0("f1 = CStr(\"", libro, "\")"),
          paste0("objExcel.Application.Run ",
-                paste0("\"'", dir_local_macro, "superindices_asp1.xlsm'!superindice\" "), ", f1"),
+                paste0("\"'", dir_local_macro, "macro_superindices_etiquetas1.xlsm'!superindice\" "), ", f1"),
          "objExcel.Application.Quit")
   d0 = paste0(dir_local_macro, "macro.vbs")
   escribe_macro(a0, d0)
